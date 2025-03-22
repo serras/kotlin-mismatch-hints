@@ -1,0 +1,1 @@
+rootProject.name = "kotlin-mismatch-hints"

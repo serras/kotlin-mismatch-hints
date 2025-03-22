@@ -1,0 +1,25 @@
+<idea-plugin>
+    <id>com.serranofp.kotlin-mismatch-hints</id>
+    <name>Kotlin Mismatch Hints</name>
+    <vendor url="https://serranofp.com">Serrano FP</vendor>
+    <description>Inlay hints succinctly describing mismatches in Kotlin code</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="org.jetbrains.kotlin">
+        <supportsKotlinPluginMode supportsK1="false" supportsK2="true" />
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.declarativeInlayProvider
+                implementationClass="com.serranofp.kotlin.mismatch.hints.MismatchInlayHintProvider"
+                language="kotlin"
+                group="TYPES_GROUP"
+                providerId="kotlin.mismatch"
+                bundle="messages.kotlin-mismatch-hints"
+                nameKey="mismatch"
+                isEnabledByDefault="true"/>
+    </extensions>
+
+</idea-plugin>
