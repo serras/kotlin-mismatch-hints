@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.serranofp"
-version = "0.1"
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -31,6 +31,7 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "243"
+            untilBuild = "251.*"
         }
     }
 }
