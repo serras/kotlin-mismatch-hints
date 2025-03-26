@@ -22,7 +22,22 @@ fun KaType.renderShort(): String = with(session) {
     this@renderShort.render(renderer = KaTypeRendererForSource.WITH_SHORT_NAMES, position = Variance.INVARIANT)
 }
 
+context(session: KaSession)
+@OptIn(KaExperimentalApi::class)
+fun KaType.renderQualified(): String = with(session) {
+    this@renderQualified.render(renderer = KaTypeRendererForSource.WITH_QUALIFIED_NAMES, position = Variance.INVARIANT)
+}
+
 fun renderNullability(type: KaType): String = if (type.nullability.isNullable) "nullable" else "non-nullable"
+
+context(session: KaSession)
+@OptIn(KaExperimentalApi::class)
+fun renderTypeProblem(one: KaType, other: KaType, block: (String, String) -> Unit) {
+    val oneRendered = one.renderShort()
+    val otherRendered = other.renderShort()
+    if (oneRendered != otherRendered) return block(oneRendered, otherRendered)
+    else block(one.renderQualified(), other.renderQualified())
+}
 
 context(session: KaSession)
 fun chooseBetterActualType(element: KtElement, problem: KaType): KaType = with(session) {

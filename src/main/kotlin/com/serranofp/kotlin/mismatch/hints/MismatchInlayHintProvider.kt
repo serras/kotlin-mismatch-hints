@@ -51,16 +51,20 @@ class MismatchInlayHintProvider : InlayHintsProvider {
 
             is ExpectedActualTypeMismatch -> sink.hintAfter(ranges) {
                 text(": ")
-                text(chooseBetterActualType(element, problem.actualType).renderShort())
-                text(" ⇏ ")
-                text(problem.expectedType.renderShort())
+                renderTypeProblem(chooseBetterActualType(element, problem.actualType), problem.expectedType) { a, e ->
+                    text(a)
+                    text(" ⇏ ")
+                    text(e)
+                }
             }
 
             is TypeMismatch -> sink.hintAfter(ranges) {
                 text(": ")
-                text(problem.typeA.renderShort())
-                text(" ≠ ")
-                text(problem.typeB.renderShort())
+                renderTypeProblem(problem.typeA, problem.typeB) { a, b ->
+                    text(a)
+                    text(" ≠ ")
+                    text(b)
+                }
             }
 
             is TypeVarianceMismatch -> sink.hintBefore(ranges) {
@@ -91,18 +95,29 @@ class MismatchInlayHintProvider : InlayHintsProvider {
             }
 
             for (expression in evenBetterCandidates.first().argumentMapping.keys) {
-                val expressionTypeString = expression.expressionType?.renderShort() ?: "??"
+                val expressionTypeStringShort = expression.expressionType?.renderShort() ?: "??"
+                val expressionTypeStringQualified = expression.expressionType?.renderQualified() ?: "??"
 
                 var somethingWrong = false
+                var needsQualification = false
                 val actualTypeStrings = mutableListOf<String>()
                 for ((index, call) in evenBetterCandidates.withIndex()) {
                     val signature = call.argumentMapping[expression] ?: continue
-                    val actualTypeString = signature.returnType.renderShort()
-                    if (expressionTypeString == actualTypeString) {
-                        actualTypeStrings.add("${Symbols[index]} ✓")
-                    } else {
-                        actualTypeStrings.add("${Symbols[index]} ⇏ $actualTypeString")
-                        somethingWrong = true
+                    val actualTypeStringShort = signature.returnType.renderShort()
+                    val actualTypeStringQualified = signature.returnType.renderQualified()
+                    when {
+                        expressionTypeStringQualified == actualTypeStringQualified -> {
+                            actualTypeStrings.add("${Symbols[index]} ✓")
+                        }
+                        expressionTypeStringShort == actualTypeStringShort -> {
+                            actualTypeStrings.add("${Symbols[index]} ⇏ $actualTypeStringQualified")
+                            somethingWrong = true
+                            needsQualification = true
+                        }
+                        else -> {
+                            actualTypeStrings.add("${Symbols[index]} ⇏ $actualTypeStringShort")
+                            somethingWrong = true
+                        }
                     }
                 }
 
@@ -110,7 +125,9 @@ class MismatchInlayHintProvider : InlayHintsProvider {
                 if (!somethingWrong) continue
 
                 sink.hintAfter(expression.endOffset) {
-                    text(": $expressionTypeString")
+                    if (needsQualification) text(": $expressionTypeStringQualified")
+                    else text(": $expressionTypeStringShort")
+
                 }
                 for (actualTypeString in actualTypeStrings) {
                     sink.hintAfter(expression.endOffset) {
