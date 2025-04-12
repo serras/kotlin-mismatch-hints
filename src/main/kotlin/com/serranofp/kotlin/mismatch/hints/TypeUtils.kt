@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.analysis.api.symbols.KaVariableSymbol
 import org.jetbrains.kotlin.analysis.api.types.KaClassType
 import org.jetbrains.kotlin.analysis.api.types.KaType
 import org.jetbrains.kotlin.analysis.api.types.KaTypeParameterType
+import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.types.Variance
@@ -30,13 +31,10 @@ fun KaType.renderQualified(): String = with(session) {
 
 fun renderNullability(type: KaType): String = if (type.nullability.isNullable) "nullable" else "non-nullable"
 
-context(session: KaSession)
-@OptIn(KaExperimentalApi::class)
-fun renderTypeProblem(one: KaType, other: KaType, block: (String, String) -> Unit) {
-    val oneRendered = one.renderShort()
-    val otherRendered = other.renderShort()
-    if (oneRendered != otherRendered) return block(oneRendered, otherRendered)
-    else block(one.renderQualified(), other.renderQualified())
+fun ClassId.render(renderQualified: Boolean): String = when {
+    outerClassId != null -> "${outerClassId!!.render(renderQualified)}.$shortClassName"
+    renderQualified -> "${this.packageFqName.pathSegments().joinToString(".")}.$shortClassName"
+    else -> "$shortClassName"
 }
 
 context(session: KaSession)
