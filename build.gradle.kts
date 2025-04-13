@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -32,6 +34,24 @@ intellijPlatform {
         ideaVersion {
             sinceBuild = "243"
             untilBuild = "251.*"
+        }
+    }
+    pluginVerification {
+        ides {
+            select {
+                types = listOf(
+                    IntelliJPlatformType.IntellijIdeaUltimate,
+                    IntelliJPlatformType.IntellijIdeaCommunity,
+                    IntelliJPlatformType.AndroidStudio
+                )
+                channels = listOf(
+                    ProductRelease.Channel.RELEASE,
+                    ProductRelease.Channel.BETA,
+                    ProductRelease.Channel.EAP
+                )
+                sinceBuild = "243"
+                untilBuild = "251.*"
+            }
         }
     }
 }
