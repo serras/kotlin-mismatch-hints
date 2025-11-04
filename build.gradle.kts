@@ -6,12 +6,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.1.20"
-    id("org.jetbrains.intellij.platform") version "2.5.0"
+    id("org.jetbrains.kotlin.jvm") version "2.2.21"
+    id("org.jetbrains.intellij.platform") version "2.10.4"
 }
 
 group = "com.serranofp"
-version = "0.2.0"
+version = "0.2.1"
 
 repositories {
     mavenCentral()
@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity("2024.3.2")
+        intellijIdeaCommunity("2024.3.7")
         pluginVerifier()
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.kotlin")
@@ -33,24 +33,23 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "243"
-            untilBuild = "251.*"
+            untilBuild = provider { null }
         }
     }
     pluginVerification {
         ides {
+            recommended()
             select {
-                types = listOf(
-                    IntelliJPlatformType.IntellijIdeaUltimate,
-                    IntelliJPlatformType.IntellijIdeaCommunity,
-                    IntelliJPlatformType.AndroidStudio
-                )
-                channels = listOf(
-                    ProductRelease.Channel.RELEASE,
-                    ProductRelease.Channel.BETA,
-                    ProductRelease.Channel.EAP
-                )
+                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                channels = listOf(ProductRelease.Channel.RELEASE, ProductRelease.Channel.RC, ProductRelease.Channel.EAP)
                 sinceBuild = "243"
-                untilBuild = "251.*"
+                untilBuild = "252.*"
+            }
+            select {
+                types = listOf(IntelliJPlatformType.IntellijIdea)
+                channels = listOf(ProductRelease.Channel.RELEASE, ProductRelease.Channel.RC, ProductRelease.Channel.EAP)
+                sinceBuild = "253"
+                untilBuild = provider { null }
             }
         }
     }
