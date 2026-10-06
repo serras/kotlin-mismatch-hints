@@ -1,8 +1,10 @@
 package com.serranofp.kotlin.mismatch.hints
 
 import com.intellij.openapi.util.TextRange
+import org.jetbrains.kotlin.analysis.api.KaContextParameterApi
 import org.jetbrains.kotlin.analysis.api.KaExperimentalApi
 import org.jetbrains.kotlin.analysis.api.KaSession
+import org.jetbrains.kotlin.analysis.api.components.isMarkedNullable
 import org.jetbrains.kotlin.analysis.api.renderer.types.impl.KaTypeRendererForSource
 import org.jetbrains.kotlin.analysis.api.resolution.KaCallableMemberCall
 import org.jetbrains.kotlin.analysis.api.signatures.KaCallableSignature
@@ -17,19 +19,21 @@ import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtExpression
 import org.jetbrains.kotlin.types.Variance
 
-context(session: KaSession)
 @OptIn(KaExperimentalApi::class)
+context(session: KaSession)
 fun KaType.renderShort(): String = with(session) {
     this@renderShort.render(renderer = KaTypeRendererForSource.WITH_SHORT_NAMES, position = Variance.INVARIANT)
 }
 
-context(session: KaSession)
 @OptIn(KaExperimentalApi::class)
+context(session: KaSession)
 fun KaType.renderQualified(): String = with(session) {
     this@renderQualified.render(renderer = KaTypeRendererForSource.WITH_QUALIFIED_NAMES, position = Variance.INVARIANT)
 }
 
-fun renderNullability(type: KaType): String = if (type.nullability.isNullable) "nullable" else "non-nullable"
+@OptIn(KaContextParameterApi::class)
+context(session: KaSession)
+fun renderNullability(type: KaType): String = if (type.isMarkedNullable) "nullable" else "non-nullable"
 
 fun ClassId.render(renderQualified: Boolean): String = when {
     outerClassId != null -> "${outerClassId!!.render(renderQualified)}.$shortClassName"

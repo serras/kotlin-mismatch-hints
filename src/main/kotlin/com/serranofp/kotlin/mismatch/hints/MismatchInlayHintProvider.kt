@@ -13,10 +13,12 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import org.jetbrains.kotlin.analysis.api.KaContextParameterApi
 import org.jetbrains.kotlin.analysis.api.KaExperimentalApi
 import org.jetbrains.kotlin.analysis.api.KaSession
 import org.jetbrains.kotlin.analysis.api.analyze
 import org.jetbrains.kotlin.analysis.api.components.KaDiagnosticCheckerFilter
+import org.jetbrains.kotlin.analysis.api.components.isMarkedNullable
 import org.jetbrains.kotlin.analysis.api.resolution.KaFunctionCall
 import org.jetbrains.kotlin.analysis.api.types.KaCapturedType
 import org.jetbrains.kotlin.analysis.api.types.KaClassType
@@ -39,13 +41,13 @@ class MismatchInlayHintProvider : InlayHintsProvider {
         const val PROVIDER_ID : String = "kotlin.mismatch"
     }
 
-    override fun createCollector(file: PsiFile, editor: Editor): InlayHintsCollector? = Collector()
+    override fun createCollector(file: PsiFile, editor: Editor): InlayHintsCollector = Collector()
 
     private class Collector : SharedBypassCollector {
         override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
             if (element !is KtElement) return
             analyze(element) {
-                for (diagnostic in element.diagnostics(KaDiagnosticCheckerFilter.ONLY_COMMON_CHECKERS)) {
+                for (diagnostic in element.directDiagnostics(KaDiagnosticCheckerFilter.ONLY_COMMON_CHECKERS)) {
                     if (diagnostic.textRanges.isEmpty()) continue
                     val problem = asProblem(diagnostic) ?: continue
                     problemHint(problem, element, diagnostic.textRanges, sink)
@@ -120,7 +122,7 @@ class MismatchInlayHintProvider : InlayHintsProvider {
                 return
             }
 
-            for (expression in evenBetterCandidates.first().argumentMapping.keys) {
+            for (expression in evenBetterCandidates.first().valueArgumentMapping.keys) {
                 val expressionType = expression.expressionType
                 val expressionTypeStringShort = expressionType?.renderShort() ?: "??"
                 val expressionTypeStringQualified = expressionType?.renderQualified() ?: "??"
@@ -129,7 +131,7 @@ class MismatchInlayHintProvider : InlayHintsProvider {
                 var needsQualification = false
                 val actualTypeStrings = mutableListOf<PresentationTreeBuilder.() -> Unit>()
                 for ((index, call) in evenBetterCandidates.withIndex()) {
-                    val signature = call.argumentMapping[expression] ?: continue
+                    val signature = call.valueArgumentMapping[expression] ?: continue
                     val actualTypeStringShort = signature.returnType.renderShort()
                     val actualTypeStringQualified = signature.returnType.renderQualified()
 
@@ -183,6 +185,7 @@ class MismatchInlayHintProvider : InlayHintsProvider {
                 builder = builder
             )
 
+        @OptIn(KaContextParameterApi::class)
         context(session: KaSession)
         fun PresentationTreeBuilder.type(type: KaType, renderQualified: Boolean) {
             when (type) {
@@ -234,7 +237,7 @@ class MismatchInlayHintProvider : InlayHintsProvider {
                 }
                 else -> text(type.renderShort())
             }
-            if (type.nullability.isNullable) {
+            if (type.isMarkedNullable) {
                 text("?")
             }
         }
