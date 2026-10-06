@@ -15,7 +15,6 @@ data class NoneApplicable(val candidates: List<KaSymbol>) : Problem
 data class AmbiguousType(val candidates: List<KaType>) : Problem
 data class AmbiguousCandidate(val candidates: List<KaSymbol>) : Problem
 
-@Suppress("UNCHECKED_CAST")
 fun KaSession.asProblem(element: KaDiagnosticWithPsi<*>): Problem? = when (element) {
     is KaFirDiagnostic.TypeMismatch -> ExpectedActualTypeMismatch(element.expectedType, element.actualType, element.isMismatchDueToNullability)
     is KaFirDiagnostic.TypeMismatchWhenFlexibilityChanges -> ExpectedActualTypeMismatch(element.expectedType, element.actualType, false)
@@ -33,7 +32,7 @@ fun KaSession.asProblem(element: KaDiagnosticWithPsi<*>): Problem? = when (eleme
     is KaFirDiagnostic.IncompatibleTypesWarning -> TypeMismatch(element.typeA, element.typeB)
     is KaFirDiagnostic.TypeVarianceConflictError -> TypeVarianceMismatch(element.typeParameterVariance, element.variance)
     is KaFirDiagnostic.TypeVarianceConflictInExpandedType -> TypeVarianceMismatch(element.typeParameterVariance, element.variance)
-    is KaFirDiagnostic.NoneApplicable -> NoneApplicable(element.candidates.map(Pair<KaSymbol, List<String>>::first))
+    is KaFirDiagnostic.NoneApplicable -> NoneApplicable(element.candidates.map { it.first })
     is KaFirDiagnostic.InapplicableCandidate -> NoneApplicable(listOf(element.candidate))
     is KaFirDiagnostic.AmbiguousSuper -> AmbiguousType(element.candidates)
     is KaFirDiagnostic.OverloadResolutionAmbiguity -> AmbiguousCandidate(element.candidates)

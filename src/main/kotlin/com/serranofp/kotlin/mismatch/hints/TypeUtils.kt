@@ -1,10 +1,8 @@
 package com.serranofp.kotlin.mismatch.hints
 
 import com.intellij.openapi.util.TextRange
-import org.jetbrains.kotlin.analysis.api.KaContextParameterApi
 import org.jetbrains.kotlin.analysis.api.KaExperimentalApi
 import org.jetbrains.kotlin.analysis.api.KaSession
-import org.jetbrains.kotlin.analysis.api.components.isMarkedNullable
 import org.jetbrains.kotlin.analysis.api.renderer.types.impl.KaTypeRendererForSource
 import org.jetbrains.kotlin.analysis.api.resolution.KaCallableMemberCall
 import org.jetbrains.kotlin.analysis.api.signatures.KaCallableSignature
@@ -14,6 +12,7 @@ import org.jetbrains.kotlin.analysis.api.symbols.KaVariableSymbol
 import org.jetbrains.kotlin.analysis.api.types.KaClassType
 import org.jetbrains.kotlin.analysis.api.types.KaType
 import org.jetbrains.kotlin.analysis.api.types.KaTypeParameterType
+import org.jetbrains.kotlin.analysis.api.types.isMarkedNullable
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.KtExpression
@@ -31,7 +30,6 @@ fun KaType.renderQualified(): String = with(session) {
     this@renderQualified.render(renderer = KaTypeRendererForSource.WITH_QUALIFIED_NAMES, position = Variance.INVARIANT)
 }
 
-@OptIn(KaContextParameterApi::class)
 context(session: KaSession)
 fun renderNullability(type: KaType): String = if (type.isMarkedNullable) "nullable" else "non-nullable"
 

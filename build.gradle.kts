@@ -1,5 +1,3 @@
-import com.sun.tools.javac.tree.TreeInfo.types
-import groovyjarjarantlr4.v4.misc.Utils.select
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
@@ -8,12 +6,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.4.0"
+    id("org.jetbrains.kotlin.jvm") version "2.4.20"
     id("org.jetbrains.intellij.platform") version "2.19.0"
 }
 
 group = "com.serranofp"
-version = "0.2.1"
+version = "0.2.2"
 
 repositories {
     mavenCentral()
@@ -24,7 +22,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdea("2026.2")
+        intellijIdea("2026.2.3")
         pluginVerifier()
         bundledPlugin("com.intellij.java")
         bundledPlugin("org.jetbrains.kotlin")
@@ -42,12 +40,6 @@ intellijPlatform {
         ides {
             recommended()
             select {
-                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
-                channels = listOf(ProductRelease.Channel.RELEASE, ProductRelease.Channel.RC, ProductRelease.Channel.EAP)
-                sinceBuild = "262"
-                untilBuild = "271.*"
-            }
-            select {
                 types = listOf(IntelliJPlatformType.IntellijIdea)
                 channels = listOf(ProductRelease.Channel.RELEASE, ProductRelease.Channel.RC, ProductRelease.Channel.EAP)
                 sinceBuild = "262"
@@ -64,8 +56,7 @@ tasks {
     }
     withType<KotlinCompile> {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
-        compilerOptions.freeCompilerArgs.addAll("-Xwhen-guards")
     }
 }
 
-val runIde: RunIdeTask by tasks
+val runIde = tasks.getByName<RunIdeTask>("runIde")
